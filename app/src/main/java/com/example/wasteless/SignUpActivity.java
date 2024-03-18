@@ -89,27 +89,27 @@ public class SignUpActivity extends AppCompatActivity {
 
                 // Check valid fields
                 if (email.isEmpty()) {
-                    GenericUtils.toast("Please enter your E-mail address", SignUpActivity.this);
+                    setErrorTextView("Please enter your E-mail address");
                     return;
                 }
 
                 if (userName.isEmpty()) {
-                    GenericUtils.toast("Please enter a user name", SignUpActivity.this);
+                    setErrorTextView("Please enter a user name");
                     return;
                 }
 
                 if (password.isEmpty()) {
-                    GenericUtils.toast("Please enter a password", SignUpActivity.this);
+                    setErrorTextView("Please enter a password");
                     return;
                 }
 
                 if (passwordReEnter.isEmpty()) {
-                    GenericUtils.toast("Please re-enter your password", SignUpActivity.this);
+                    setErrorTextView("Please re-enter your password");
                     return;
                 }
 
                 if (!password.equals(passwordReEnter)) {
-                    GenericUtils.toast("Passwords are not the same", SignUpActivity.this);
+                    setErrorTextView("Passwords are not the same");
                     return;
                 }
 
@@ -132,16 +132,19 @@ public class SignUpActivity extends AppCompatActivity {
                 .addOnCompleteListener(SignUpActivity.this, task -> {
                     progressBar.setVisibility(View.GONE);
                     if (task.isSuccessful()) {
+
+                        setErrorTextView("New user created successfully.");
+
                         FirebaseUser user = auth.getCurrentUser();
 
                         if (user != null) {
                             UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(userName).build();
                             user.updateProfile(profileChangeRequest);
                         } else {
-                            GenericUtils.toast("Failed to get user information", SignUpActivity.this);
+                            setErrorTextView("Failed to get user information");
                         }
                     } else {
-                        GenericUtils.toast("Account creation failed", SignUpActivity.this);
+                        setErrorTextView("Account creation failed");
 
                     }
                 }).addOnFailureListener(e -> {

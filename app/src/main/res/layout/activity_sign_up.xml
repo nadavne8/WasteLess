@@ -59,6 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:hint="Enter your password"
+                android:inputType="textPassword"
                 android:drawableStart="@drawable/lock_icon"
                 android:drawablePadding="8dp"
                 android:layout_marginTop="20dp"
