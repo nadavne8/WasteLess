@@ -2,6 +2,8 @@ package com.example.wasteless;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -87,6 +89,8 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             GenericUtils.toast("Authentication failed.", LoginActivity.this);
+                            Animation shakeAnimation = AnimationUtils.loadAnimation(LoginActivity.this, R.anim.login_failed);
+                            btnLogin.startAnimation(shakeAnimation);
                         }
                     }
                 });
