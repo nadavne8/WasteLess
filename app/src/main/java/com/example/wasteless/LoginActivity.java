@@ -2,6 +2,7 @@ package com.example.wasteless;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -26,6 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class LoginActivity extends AppCompatActivity {
     EditText tvEmail, tvPassword;
     Button btnLogin, btnSignUp;
+    TextView errorText;
     FirebaseAuth auth;
 
     @Override
@@ -43,6 +45,7 @@ public class LoginActivity extends AppCompatActivity {
         tvPassword = findViewById(R.id.passwordEt);
         btnLogin = findViewById(R.id.btnContinue);
         btnSignUp = findViewById(R.id.btnSignUp);
+        errorText = findViewById(R.id.errorTextView);
 
         btnLogin.setOnClickListener(view -> {
             setLoginOnClickFlow();
@@ -65,12 +68,14 @@ public class LoginActivity extends AppCompatActivity {
         password = tvPassword.getText().toString();
 
         if (email.isEmpty()) {
-            GenericUtils.toast("E-Mail is empty.", LoginActivity.this);
+            errorText.setText("E-Mail is empty.");
+            errorText.setVisibility(View.VISIBLE);
             return;
         }
 
         if (password.isEmpty()) {
-            GenericUtils.toast("Password is empty.", LoginActivity.this);
+            errorText.setText("Password is empty.");
+            errorText.setVisibility(View.VISIBLE);
             return;
         }
 
@@ -82,13 +87,13 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-//                                FirebaseUser user = auth.getCurrentUser();
-                            GenericUtils.toast("WOOOOW", LoginActivity.this);
                             goToMainActivity();
 
                         } else {
                             // If sign in fails, display a message to the user.
                             GenericUtils.toast("Authentication failed.", LoginActivity.this);
+                            errorText.setText("Authentication failed.");
+                            errorText.setVisibility(View.VISIBLE);
                             Animation shakeAnimation = AnimationUtils.loadAnimation(LoginActivity.this, R.anim.login_failed);
                             btnLogin.startAnimation(shakeAnimation);
                         }
