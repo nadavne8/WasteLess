@@ -68,11 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
             setLogoutOnclickFunctionality();
 
-            Button tipButton = findViewById(R.id.tip);
-            tipButton.setOnClickListener(view -> {
-                giveTip();
-            });
-
             setAddItemOnclickFunctionality();
 
             setMapActivityOnclick();
@@ -164,8 +159,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIfNeedToShowTip(Float sumOfWeight) {
-
+        if (sumOfWeight > lastWeekRecyclingSum) {
+            // TODO: Show window with difference and tip
+            float percentageOfGrowth = ((sumOfWeight / lastWeekRecyclingSum)*100)-100;
+            giveTip(percentageOfGrowth);
+        } else {
+            float percentageSmaller = 100 - ((sumOfWeight / lastWeekRecyclingSum)*100);
+            congratulateUser(percentageSmaller);
+        }
     }
+
+
 
     private void setAddItemOnclickFunctionality() {
         btnAddItem.setOnClickListener(view -> {
@@ -181,7 +185,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void giveTip() {
+    private void congratulateUser(float percentageSmaller) {
+        GenericUtils.toast(String.format("Congratulations! this week you recycled %s less than last week.",percentageSmaller), this);
+    }
+
+    private void giveTip(float percentageOfGrowth) {
         tipCollection = firestore.collection("tips").document("1");
         tipCollection.get().addOnCompleteListener( task -> {
             if (task.isSuccessful()) {
@@ -198,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                         Object randomValue = data.get(randomField);
 
                         if (randomValue != null) {
-                            GenericUtils.toast((String) data.get("0"), this);
+                            GenericUtils.toast(String.format("This week you recycled %s more than last week. ", percentageOfGrowth)  +  (String) data.get("0"), this);
                         }
 
                     }
