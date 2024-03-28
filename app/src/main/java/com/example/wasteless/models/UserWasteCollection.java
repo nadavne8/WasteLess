@@ -44,6 +44,13 @@ public class UserWasteCollection {
         }
     }
 
+    public void getWasteDataForLastWeek(ValueEventListener listener) {
+        // TODO: Change this back
+        String sundayDateKey = GenericUtils.getLastWeekSundayDateKey();
+        DatabaseReference weekCollectionRef = userCollectionRef.child(sundayDateKey);
+        weekCollectionRef.addValueEventListener(listener);
+    }
+
     public void addWasteData(WasteDataModel wasteData) {
 
         // Generate a unique UUID for the waste data:

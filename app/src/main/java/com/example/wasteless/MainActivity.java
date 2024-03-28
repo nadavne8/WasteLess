@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private UserWasteCollection wasteCollectionReference;
     private DocumentReference tipCollection;
+    private float lastWeekRecyclingSum = 0f;
+
 
     public void onStart() {
         super.onStart();
@@ -102,9 +104,30 @@ public class MainActivity extends AppCompatActivity {
 
             });
 
+            getLastWeekWeightSum();
+
         } else {
             goToLoginPage();
         }
+    }
+
+    private void getLastWeekWeightSum() {
+        wasteCollectionReference.getWasteDataForLastWeek(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    WasteDataModel wasteData = dataSnapshot.getValue(WasteDataModel.class);
+                    if (wasteData != null) {
+                        lastWeekRecyclingSum += wasteData.getWeight();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void initRecyclerView() {
@@ -141,28 +164,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIfNeedToShowTip(Float sumOfWeight) {
-//        wasteCollectionReference.getWasteDataOfLastWeek(new ValueEventListener() {
-//            @SuppressLint("NotifyDataSetChanged")
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                wasteDataModelList.clear(); // Clear the list before adding new data
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    WasteDataModel wasteData = snapshot.getValue(WasteDataModel.class);
-//                    if (wasteData != null) {
-//                        wasteDataModelList.add(wasteData);
-//                    }
-//                }
-//                adapter.notifyDataSetChanged(); // Notify the adapter of data changes
-//                updateTotalWeightTextView();
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//
-//        });
+
     }
 
     private void setAddItemOnclickFunctionality() {
