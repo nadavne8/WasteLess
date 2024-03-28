@@ -79,6 +79,15 @@
 
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/errorTextView"
+        android:text="Some text"
+        android:textSize="20sp"
+        android:visibility="gone"
+        android:fontFamily="sans-serif-smallcaps"/>
+
     <Button
         android:id="@+id/btnSignUp"
         android:layout_width="wrap_content"

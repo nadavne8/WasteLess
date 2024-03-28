@@ -20,8 +20,8 @@ import java.util.Locale;
 public class GenericUtils {
     public static void toast(String toast, Context context) {
         Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
-
     }
+
     public static boolean isValidFloat(String number) {
         boolean retVal = true;
 
@@ -36,6 +36,14 @@ public class GenericUtils {
     }
     public static String getCurrentWeekSundayDateKey() {
         Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return dateFormat.format(calendar.getTime());
+    }
+
+    public static String getLastWeekSundayDateKey() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return dateFormat.format(calendar.getTime());

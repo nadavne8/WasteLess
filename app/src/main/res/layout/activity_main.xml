@@ -51,8 +51,19 @@
         android:textSize="32sp"
         android:id="@+id/sumWeightTv"
         />
-
     <!-- Add Item Button -->
+
+
+
+    <Button
+        android:id="@+id/tip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="tip"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/green"
+        app:cornerRadius="20dp"/>
 
     <Button
         android:id="@+id/addItemButton"
@@ -87,6 +98,7 @@
         android:backgroundTint="@color/purple"
         app:cornerRadius="20dp"
         android:layout_marginBottom="16dp"/>
+
 
 
 

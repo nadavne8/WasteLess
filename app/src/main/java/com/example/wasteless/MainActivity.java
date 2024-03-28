@@ -26,10 +26,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth auth;
@@ -38,8 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView welcomeTextView, totalWeightTextView, dateTextView;
     private List<WasteDataModel> wasteDataModelList;
     private WasteDataAdapter adapter;
-
+    private FirebaseFirestore firestore;
     private UserWasteCollection wasteCollectionReference;
+    private DocumentReference tipCollection;
 
     public void onStart() {
         super.onStart();
@@ -48,8 +53,10 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
 
-
+            // הדאטהבייס של המשתמש - שומר את המידע לגבי המחזור שלו
             wasteCollectionReference = UserWasteCollection.getInstance(currentUser.getUid());
+
+            firestore = FirebaseFirestore.getInstance();
 
             bindAllElements();
 
@@ -58,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
             setWelcomeMessage(currentUser);
 
             setLogoutOnclickFunctionality();
+
+            Button tipButton = findViewById(R.id.tip);
+            tipButton.setOnClickListener(view -> {
+                giveTip();
+            });
 
             setAddItemOnclickFunctionality();
 
@@ -124,6 +136,33 @@ public class MainActivity extends AppCompatActivity {
             sumOfWeight += item.getWeight();
         }
         totalWeightTextView.setText("Total weight recycled: " + sumOfWeight + " KG");
+
+        checkIfNeedToShowTip(sumOfWeight);
+    }
+
+    private void checkIfNeedToShowTip(Float sumOfWeight) {
+//        wasteCollectionReference.getWasteDataOfLastWeek(new ValueEventListener() {
+//            @SuppressLint("NotifyDataSetChanged")
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                wasteDataModelList.clear(); // Clear the list before adding new data
+//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//                    WasteDataModel wasteData = snapshot.getValue(WasteDataModel.class);
+//                    if (wasteData != null) {
+//                        wasteDataModelList.add(wasteData);
+//                    }
+//                }
+//                adapter.notifyDataSetChanged(); // Notify the adapter of data changes
+//                updateTotalWeightTextView();
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//
+//        });
     }
 
     private void setAddItemOnclickFunctionality() {
@@ -137,6 +176,35 @@ public class MainActivity extends AppCompatActivity {
         btnLogout.setOnClickListener(view -> {
             FirebaseAuth.getInstance().signOut();
             goToLoginPage();
+        });
+    }
+
+    private void giveTip() {
+        tipCollection = firestore.collection("tips").document("1");
+        tipCollection.get().addOnCompleteListener( task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot snapshot = task.getResult();
+                if (snapshot.exists()) {
+                    Random random = new Random();
+
+                    Map<String, Object> data = snapshot.getData();
+
+
+                    if (data != null && !data.isEmpty()) {
+                        int randomIndex = random.nextInt(data.size());
+                        String randomField = String.valueOf(randomIndex);
+                        Object randomValue = data.get(randomField);
+
+                        if (randomValue != null) {
+                            GenericUtils.toast((String) data.get("0"), this);
+                        }
+
+                    }
+                }
+            } else {
+                String error = task.getException().getMessage();
+                GenericUtils.toast(error,this);
+            }
         });
     }
 
