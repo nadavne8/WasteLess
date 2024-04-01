@@ -1,8 +1,11 @@
 package com.example.wasteless;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -10,6 +13,8 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -18,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wasteless.adapters.WasteDataAdapter;
 import com.example.wasteless.fragments.AddItemDialogFragment;
+import com.example.wasteless.fragments.TipDialogFragment;
 import com.example.wasteless.models.UserWasteCollection;
 import com.example.wasteless.models.WasteDataModel;
 import com.example.wasteless.utils.GenericUtils;
@@ -29,15 +35,19 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    //הגדרת משתנים
+    private static final int REQUEST_CODE_PERMISSIONS = 1;
     private FirebaseAuth auth;
-    private Button btnLogout, btnAddItem, btnMap;
+    private Button btnLogout, btnAddItem;
     private RecyclerView recyclerView;
     private TextView welcomeTextView, totalWeightTextView, dateTextView;
     private List<WasteDataModel> wasteDataModelList;
@@ -53,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = auth.getCurrentUser();
+
+
+        requestPermissions();
+
         if (currentUser != null) {
 
             // הדאטהבייס של המשתמש - שומר את המידע לגבי המחזור שלו
@@ -60,31 +74,36 @@ public class MainActivity extends AppCompatActivity {
 
             firestore = FirebaseFirestore.getInstance();
 
+            startCountdownTimer();
+
             bindAllElements();
 
             setDate();
 
             setWelcomeMessage(currentUser);
 
-            setLogoutOnclickFunctionality();
+            setLogoutOnclickFunctionality();//מנתקת את החשבון הנוכחי מחשבון הfirebase שלו ועוברת לדף הlogin
 
-            setAddItemOnclickFunctionality();
-
-            setMapActivityOnclick();
+            setAddItemOnclickFunctionality();//מגדיר את התנהגות המערכת באמצעות listener כאשר המשתמש לוחץ על הכפתור addItem
 
             // Init recyclerview
             initRecyclerView();
 
+            // פה מביאים את הנתונים של השבוע הנוכחי,
+            // רושמים את הListener ומאזינים לשינויים בדאטהבייס
             // Fetch data for the current week and update RecyclerView
             wasteCollectionReference.getWasteDataForCurrentWeek(new ValueEventListener() {
                 @SuppressLint("NotifyDataSetChanged")
                 @Override
+                /**
+                 * This is called when we get the data form the database
+                 */
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     wasteDataModelList.clear(); // Clear the list before adding new data
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        WasteDataModel wasteData = snapshot.getValue(WasteDataModel.class);
+                        WasteDataModel wasteData = snapshot.getValue(WasteDataModel.class);//עוברת על כל הנתונים של הsnapshot ומגדירה כל אחד כפריט בודד
                         if (wasteData != null) {
-                            wasteDataModelList.add(wasteData);
+                            wasteDataModelList.add(wasteData);//בודק אם האובייקט שנוצר מהנתוניים בsnapshot לא ריק ואם לא ריק, מוסיפה אותו לרשימה recycleView
                         }
                     }
                     adapter.notifyDataSetChanged(); // Notify the adapter of data changes
@@ -106,6 +125,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void requestPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // Request permissions
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_PERMISSIONS);
+        }
+    }
+
+    private void startCountdownTimer() {
+
+        TextView TextTimer = findViewById(R.id.timerTv);
+
+        // Get current time in milliseconds
+        long currentTime = System.currentTimeMillis();
+
+        long totalMillisecondsInAWeek = GenericUtils.getNextSundayDateInMilliseconds() - currentTime;
+        new CountDownTimer(totalMillisecondsInAWeek, 1000) {
+            public void onTick(long millisUntilFinished) {
+                // Convert milliseconds to days, hours, minutes, and seconds
+                long days = millisUntilFinished / (24 * 60 * 60 * 1000);
+                long hours = (millisUntilFinished % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000);
+                long minutes = (millisUntilFinished % (60 * 60 * 1000)) / (60 * 1000);
+                long seconds = (millisUntilFinished % (60 * 1000)) / 1000;
+
+                // Set the text to display the remaining time
+                TextTimer.setText(String.format("%02d:%02d:%02d:%02d", days, hours, minutes, seconds));
+            }
+
+            public void onFinish() {
+            }
+        }.start();
+    }
+
     private void getLastWeekWeightSum() {
         wasteCollectionReference.getWasteDataForLastWeek(new ValueEventListener() {
             @Override
@@ -119,31 +174,30 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {//מטפלת במקרה בו יש בעיה במהלך קיראה לdatabase
 
             }
         });
     }
 
     private void initRecyclerView() {
-        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);//קביעת הפנייה
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
 
+
+    // פה מקשרים בין הכפתור ב-layout לactivity
     public void bindAllElements() {
         btnAddItem = findViewById(R.id.addItemButton);
         btnLogout = findViewById(R.id.logoutButton);
         welcomeTextView = findViewById(R.id.welcomeTv);
-        btnMap = findViewById(R.id.googleMapsButton);
         totalWeightTextView = findViewById(R.id.sumWeightTv);
         dateTextView = findViewById(R.id.dateTv);
     }
 
-    private void setMapActivityOnclick() {
-    }
 
-    private void setDate() {
+    private void setDate() {//מעדכן את היום הראשון בשבוע
         dateTextView.setText("Week of " + GenericUtils.getHumanReadableDate(GenericUtils.getCurrentWeekSundayDateKey()));
         dateTextView.setVisibility(View.VISIBLE);
     }
@@ -161,8 +215,15 @@ public class MainActivity extends AppCompatActivity {
     private void checkIfNeedToShowTip(Float sumOfWeight) {
         if (sumOfWeight > lastWeekRecyclingSum) {
             // TODO: Show window with difference and tip
-            float percentageOfGrowth = ((sumOfWeight / lastWeekRecyclingSum)*100)-100;
-            giveTip(percentageOfGrowth);
+            float percentageOfGrowth;
+            String info;
+            if (lastWeekRecyclingSum == 0) {
+                info = String.format("Good first week! This week you recycled %s%% ", sumOfWeight);
+            } else {
+                percentageOfGrowth = ((sumOfWeight / lastWeekRecyclingSum)*100)-100;
+                info = String.format("This week you recycled %s%% more than last week. ", percentageOfGrowth);
+            }
+            giveTip(info);
         } else {
             float percentageSmaller = 100 - ((sumOfWeight / lastWeekRecyclingSum)*100);
             congratulateUser(percentageSmaller);
@@ -186,10 +247,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void congratulateUser(float percentageSmaller) {
-        GenericUtils.toast(String.format("Congratulations! this week you recycled %s less than last week.",percentageSmaller), this);
+        showTipFragment("",String.format("Congratulations! this week you recycled %s%% less than last week.",percentageSmaller) );
     }
 
-    private void giveTip(float percentageOfGrowth) {
+    private void showTipFragment(String tipString, String titleString) {
+        TipDialogFragment tipDialogFragment = new TipDialogFragment(titleString, tipString);
+        tipDialogFragment.show(getSupportFragmentManager(), "AddItemDialog");
+    }
+
+    private void giveTip(String howMuchRecycledString) {
         tipCollection = firestore.collection("tips").document("1");
         tipCollection.get().addOnCompleteListener( task -> {
             if (task.isSuccessful()) {
@@ -206,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
                         Object randomValue = data.get(randomField);
 
                         if (randomValue != null) {
-                            GenericUtils.toast(String.format("This week you recycled %s more than last week. ", percentageOfGrowth)  +  (String) data.get("0"), this);
+                            showTipFragment((String) randomValue, howMuchRecycledString);
                         }
 
                     }
@@ -247,6 +313,8 @@ public class MainActivity extends AppCompatActivity {
         adapter = new WasteDataAdapter(wasteDataModelList);
     }
 
+
+    // זאת הפונקציה שמתחילה את התהליך של הכנסת הנתונים לdatabase
     public void addItem(WasteDataModel wasteData) {
         wasteCollectionReference.addWasteData(wasteData);
     }

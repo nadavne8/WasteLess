@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class GenericUtils {
     public static void toast(String toast, Context context) {
@@ -47,6 +48,20 @@ public class GenericUtils {
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return dateFormat.format(calendar.getTime());
+    }
+
+    public static long getNextSundayDateInMilliseconds() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, 1);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        TimeZone timeZone = TimeZone.getDefault(); // Get the local time zone
+        calendar.setTimeZone(timeZone); // Set the time zone
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long retVal = calendar.getTime().getTime();
+        return retVal;
     }
 
     public static String getHumanReadableDate(String dateString) {

@@ -15,6 +15,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Singleton object that refers to the Database Collection
+ *  אובייקט מסוג סינגלטון שמצביע על מבנה הנתונים בדאטהבייס
+ */
 public class UserWasteCollection {
     /**
      * Object that references the current user's waste data collection
@@ -36,6 +40,11 @@ public class UserWasteCollection {
         return instance;
     }
 
+
+    /**
+     * Get the user's data for the current week, handle result at the listener
+     * @param listener
+     */
     public void getWasteDataForCurrentWeek(ValueEventListener listener) {
         String sundayDateKey = GenericUtils.getCurrentWeekSundayDateKey();
         if (sundayDateKey != null) {

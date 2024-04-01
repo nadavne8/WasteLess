@@ -11,6 +11,7 @@
     tools:context=".MainActivity">
 
     <!-- Welcome Text -->
+
     <TextView
         android:id="@+id/welcomeTv"
         android:layout_width="wrap_content"
@@ -21,6 +22,28 @@
         android:fontFamily="sans-serif-light"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_gravity="center"
+        android:id="@+id/weekEndInTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif-light"
+        android:text="The week is about to end in:"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/timerTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif-light"
+        android:text=""
+        android:textSize="20dp" />
 
     <TextView
         android:visibility="gone"
@@ -35,7 +58,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
+        android:layout_width="377dp"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
@@ -47,23 +70,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:gravity="center"
         android:text="0.0"
         android:textSize="32sp"
         android:id="@+id/sumWeightTv"
         />
     <!-- Add Item Button -->
 
-
-
-    <Button
-        android:id="@+id/tip"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="tip"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="@color/green"
-        app:cornerRadius="20dp"/>
 
     <Button
         android:id="@+id/addItemButton"
@@ -75,17 +88,6 @@
         android:backgroundTint="@color/green"
         app:cornerRadius="20dp"/>
 
-
-    <!-- Google Maps Button -->
-    <Button
-        android:id="@+id/googleMapsButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Show map"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="@color/green"
-        app:cornerRadius="20dp"/>
 
     <!-- Log Out Button -->
     <Button

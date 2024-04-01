@@ -46,7 +46,6 @@ public class WasteDataAdapter extends RecyclerView.Adapter<WasteDataAdapter.View
         }
 
         holder.deleteButton.setOnClickListener(view -> {
-            // TODO: Get the date from the collection
             UserWasteCollection.getInstance(null).deleteWasteData(GenericUtils.getCurrentWeekSundayDateKey(), wasteData.getUuid());
         });
     }
